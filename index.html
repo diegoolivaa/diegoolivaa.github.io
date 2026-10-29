@@ -20,10 +20,18 @@
         scroll-behavior: smooth;
         scrollbar-width: none;
         -ms-overflow-style: none;
+        scroll-snap-type: y mandatory;
     }
 
     html::-webkit-scrollbar {
         display: none;
+    }
+
+    .hero,
+    .bio,
+    .projects,
+    .contact {
+        scroll-snap-align: start;
     }
 
     body {
@@ -38,15 +46,16 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        width: 100vw;
+        width: 100%;
         height: 100vh;
+        height: 100svh;
         background: linear-gradient(-45deg, #0a1128, #101f42, #003554, #006494);
         background-size: 400% 400%;
         color: #ffffff;
         animation: gradientAnimation 16s ease infinite;
+        scroll-snap-stop: always;
     }
 
-    /* Subtle tech grid overlay */
     .hero::before {
         content: "";
         position: absolute;
@@ -97,20 +106,34 @@
 
     .bio {
         min-height: 100vh;
-        min-width: 100vw;
+        min-height: 100svh;
+        width: 100%;
+        padding: 100px 8vw 40px;
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: center;
         gap: 40px;
         color: whitesmoke;
+        scroll-snap-stop: always;
+    }
+
+    .bio .text {
+        display: block;
+        flex: 0 1 620px;
+        min-width: 0;
     }
 
     #logo {
         border: 0px solid black;
         border-radius: 50%;
         overflow: hidden;
-        max-width: 350px;
+        width: 350px;
+        max-width: 100%;
+        min-width: 0;
+        aspect-ratio: 1;
+        object-fit: cover;
+        flex-shrink: 1;
     }
 
     #logo:hover {
@@ -193,11 +216,11 @@
     .languages {
         display: flex;
         flex-direction: row;
+        flex-wrap: wrap;
         margin-top: 20px;
         gap: 20px;
     }
 
-    /* NAV */
     .topnav {
         position: fixed;
         top: 0;
@@ -214,6 +237,79 @@
         color: whitesmoke;
     }
 
+    .menu {
+        display: flex;
+        align-items: center;
+        gap: 28px;
+    }
+
+    .language,
+    .language::picker(select) {
+        appearance: base-select;
+    }
+
+    .language {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0;
+        border: none;
+        background: transparent;
+        color: whitesmoke;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 1rem;
+        font-weight: lighter;
+        cursor: pointer;
+    }
+
+    .language::picker-icon {
+        color: rgba(245, 245, 245, 0.6);
+    }
+
+    .language:focus-visible {
+        outline: 1px solid rgba(255, 255, 255, 0.4);
+        outline-offset: 4px;
+        border-radius: 6px;
+    }
+
+    .language::picker(select) {
+        background: #0f1a38;
+        color: whitesmoke;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 12px;
+        padding: 6px;
+        margin-top: 10px;
+        opacity: 0;
+        transition: opacity 0.2s ease, display 0.2s allow-discrete, overlay 0.2s allow-discrete;
+    }
+
+    .language::picker(select):popover-open {
+        opacity: 1;
+    }
+
+    @starting-style {
+        .language::picker(select):popover-open {
+            opacity: 0;
+        }
+    }
+
+    .language option {
+        padding: 8px 14px;
+        border-radius: 8px;
+        color: whitesmoke;
+        font-weight: lighter;
+        transition: background-color 0.2s ease;
+    }
+
+    .language option:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .language option:checked {
+        background-color: rgba(255, 255, 255, 0.06);
+        font-weight: normal;
+    }
+
     .topnav a {
         color: whitesmoke;
         text-decoration: none;
@@ -222,11 +318,6 @@
     .brand {
         font-weight: bold;
         letter-spacing: -0.02em;
-    }
-
-    .menu {
-        display: flex;
-        gap: 28px;
     }
 
     .menu a {
@@ -257,7 +348,7 @@
 
     .project-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
         gap: 24px;
     }
 
@@ -312,7 +403,6 @@
         text-underline-offset: 4px;
     }
 
-    /* CONTACT */
     .contact {
         padding: 80px 8vw;
         color: whitesmoke;
@@ -340,17 +430,40 @@
         color: #0a1128;
     }
 
-    /* FOOTER */
     .footer {
         padding: 30px;
         text-align: center;
         font-weight: lighter;
         color: rgba(245, 245, 245, 0.6);
         border-top: 1px solid rgba(255, 255, 255, 0.08);
+        scroll-snap-align: end;
     }
 
-    /* MOBILE WEBSITE ADAPTATION */
+    .fade-element {
+        opacity: 0;
+        translate: 0 40px;
+        transition: opacity 1s ease, translate 1s ease;
+    }
+
+    .fade-element.visible {
+        opacity: 1;
+        translate: none;
+    }
+
+    .project-card.fade-element {
+        transition: opacity 1s ease, translate 1s ease, transform 0.2s ease-in-out, border-color 0.2s ease-in-out;
+    }
+
     @media (max-width: 800px) {
+        html {
+            scroll-snap-type: y proximity;
+        }
+
+        .hero,
+        .bio {
+            scroll-snap-stop: normal;
+        }
+
         .topnav {
             padding: 14px 20px;
         }
@@ -359,9 +472,102 @@
             gap: 16px;
         }
 
+        .hero h1 {
+            font-size: clamp(2.2rem, 11vw, 4rem);
+            text-align: center;
+        }
+
         .bio {
             flex-direction: column;
-            padding: 80px 20px 40px;
+            padding: 100px 20px 60px;
+            text-align: center;
+        }
+
+        .bio .text {
+            flex: 0 1 auto;
+            width: 100%;
+        }
+
+        #logo {
+            width: min(260px, 70vw);
+        }
+
+        .bio h1 {
+            font-size: 1.6rem;
+        }
+
+        .languages {
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .lang {
+            height: 72px;
+        }
+
+        .lang img {
+            width: 48px;
+            height: 48px;
+        }
+
+        .projects {
+            padding: 100px 20px 60px;
+        }
+
+        .section-title {
+            font-size: 2rem;
+        }
+
+        .project-card {
+            padding: 22px;
+        }
+
+        .contact {
+            padding: 60px 20px;
+        }
+
+        .contact-links a {
+            padding: 10px 22px;
+        }
+    }
+
+    @media (max-width: 520px) {
+        .topnav {
+            padding: 12px 14px;
+        }
+
+        .brand {
+            font-size: 0.85rem;
+        }
+
+        .menu {
+            gap: 10px;
+        }
+
+        .menu a,
+        .language {
+            font-size: 0.85rem;
+        }
+    }
+
+    @media (max-width: 380px) {
+        .topnav {
+            flex-wrap: wrap;
+            justify-content: center;
+            row-gap: 6px;
+        }
+
+        .bio,
+        .projects {
+            padding-top: 120px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .fade-element {
+            opacity: 1;
+            translate: none;
+            transition: none;
         }
     }
 
@@ -401,9 +607,14 @@
     <header class="topnav">
         <a href="#home" class="brand">@diegoolivaa</a>
         <nav class="menu">
-            <a href="#about">About</a>
-            <a href="#projects">Projects</a>
-            <a href="#contact">Contact</a>
+            <a href="#about" data-i18n="nav-about">About</a>
+            <a href="#projects" data-i18n="nav-projects">Projects</a>
+            <a href="#contact" data-i18n="nav-contact">Contact</a>
+            <select name="Language" class="language" id="language-button">
+                <option value="en">English</option>
+                <option value="it">Italiano</option>
+                <option value="fr">Français</option>
+            </select>
         </nav>
     </header>
 
@@ -417,7 +628,7 @@
 
     <section class="bio" id="about">
         <img src="./img/logo.jpeg" alt="logo" id="logo">
-        <span class="text">
+        <span class="text fade-element">
             <h1>Systems & Web Developer</h1>
             <p>
                 I am an Information Technology student focused on building efficient low-level software <br>and modern
@@ -438,15 +649,19 @@
                     <img src="./img/rust-brands-solid-full.svg" title="Rust" alt="Rust">
                     <span class="lang-text">Rust</span>
                 </div>
+                <div class="lang">
+                    <img src="./img/python-brands-solid-full.svg" title="Rust" alt="Rust">
+                    <span class="lang-text">Python</span>
+                </div>
             </nav>
         </span>
     </section>
 
     <section class="projects" id="projects">
-        <h2 class="section-title">My Projects</h2>
+        <h2 class="section-title fade-element">My Projects</h2>
         <div class="project-grid">
 
-            <article class="project-card">
+            <article class="project-card fade-element">
                 <h3>Exact-Hour</h3>
                 <p>My first GitHub Repo! It is a simple website that displays the current time.</p>
                 <ul class="tags">
@@ -459,7 +674,7 @@
                 </div>
             </article>
 
-            <article class="project-card">
+            <article class="project-card fade-element">
                 <h3>TubeLoader</h3>
                 <p>A Python app that lets you download the video or the audio of a YouTube video.</p>
                 <ul class="tags">
@@ -470,7 +685,7 @@
                 </div>
             </article>
 
-            <article class="project-card">
+            <article class="project-card fade-element">
                 <h3>Chip8 Emulator</h3>
                 <p>My first low-level project! As the name says, this is a Chip8 Emulator made in C with SDL2.</p>
                 <ul class="tags">
@@ -481,7 +696,7 @@
                 </div>
             </article>
 
-            <article class="project-card">
+            <article class="project-card fade-element">
                 <h3>Grip</h3>
                 <p>Grip is a blazing fast CLI disk usage analyzer written in Rust.</p>
                 <ul class="tags">
@@ -492,7 +707,7 @@
                 </div>
             </article>
 
-            <article class="project-card">
+            <article class="project-card fade-element">
                 <h3>Sortit</h3>
                 <p>Sortit is an automatic file organizer written in Rust.</p>
                 <ul class="tags">
@@ -503,7 +718,7 @@
                 </div>
             </article>
 
-            <article class="project-card">
+            <article class="project-card fade-element">
                 <h3>Sysfetch</h3>
                 <p>Sysfetch is a neofetch-style system info tool for Windows (and Linux), written in Rust.</p>
                 <ul class="tags">
@@ -514,7 +729,7 @@
                 </div>
             </article>
 
-            <article class="project-card">
+            <article class="project-card fade-element">
                 <h3>Webjack (my latest project!)</h3>
                 <p>Webjack is a simple web implementation of the famous casino game Blackjack.</p>
                 <ul class="tags">
@@ -527,7 +742,7 @@
                 </div>
             </article>
 
-            <article class="project-card">
+            <article class="project-card fade-element">
                 <h3>Collab on mariowOS</h3>
                 <p>I am currently working on with my friend.</p>
                 <ul class="tags">
@@ -539,7 +754,7 @@
                 </div>
             </article>
 
-            <article class="project-card">
+            <article class="project-card fade-element">
                 <h3>Really Damn Lightweight OS</h3>
                 <p>Simple OS that I am working on! No utility yet, by the way.</p>
                 <ul class="tags">
@@ -555,15 +770,17 @@
     </section>
 
     <section class="contact" id="contact">
-        <h2 class="section-title">Contact</h2>
-        <p class="contact-intro">Want to work together or just say hi? Reach me here.</p>
-        <div class="contact-links">
+        <h2 class="section-title fade-element">Contact</h2>
+        <p class="contact-intro fade-element">Want to work together or just say hi? Reach me here.</p>
+        <div class="contact-links fade-element">
             <a href="mailto:diegooolivapostaelettronica@gmail.com">Email</a>
             <a href="https://github.com/diegoolivaa" target="_blank" rel="noopener">GitHub</a>
         </div>
     </section>
 
     <footer class="footer">© 2026 Diego Oliva</footer>
+
+    <script src="./script.js"></script>
 </body>
 
 </html>
